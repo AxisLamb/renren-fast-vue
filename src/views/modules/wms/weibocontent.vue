@@ -7,7 +7,8 @@
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
         <el-button v-if="isAuth('wms:weibocontent:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
-        <el-button v-if="isAuth('wms:weibocontent:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
+        <!-- <el-button v-if="isAuth('wms:weibocontent:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button> -->
+        <el-button type="danger" @click="genFiles()" :disabled="dataListSelections.length <= 0">生成模板</el-button>
       </el-form-item>
     </el-form>
     <el-table
@@ -40,11 +41,11 @@
         align="center"
         label="发布时间">
       </el-table-column>
-      <el-table-column
+      <!-- <el-table-column
         prop="weiboProfileId"
         header-align="center"
         align="center"
-        label="微博人信息id">
+        label="微博人信息id"> -->
       </el-table-column>
       <el-table-column
         prop="commentsCount"
@@ -64,12 +65,12 @@
         align="center"
         label="微博点赞数">
       </el-table-column>
-      <el-table-column
+      <!-- <el-table-column
         prop="authorName"
         header-align="center"
         align="center"
         label="微博作者昵称">
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column
         prop="profileUrl"
         header-align="center"
@@ -77,6 +78,24 @@
         label="微博地址首页">
       </el-table-column>
       <el-table-column
+        prop="weibo_picture"
+        header-align="center"
+        align="center"
+        label="微博图片">
+        <template slot-scope="scope">
+          <el-popover
+                placement="right"
+                title=""
+                trigger="click">
+            <!-- <el-image slot="reference" v-for="item in scope.row.picPathList" :src="item" :alt="item" style="max-height: 200px;max-width: 200px"></el-image>
+            <el-image v-for="item in scope.row.picPathList" :src="item" width="40" height="40"></el-image> -->
+            <img slot="reference" v-for="item in scope.row.picPathList" :src="item" :alt="item" style="max-height: 100px;max-width: 100px"/>
+            <img v-for="item in scope.row.picPathList" :src="item" width="600" height="600" class="head_pic"/>
+          </el-popover>
+          <!-- <img v-for="item in scope.row.picPathList" :src="item" width="40" height="40" class="head_pic"/> -->
+        </template>
+      </el-table-column>
+      <!-- <el-table-column
         prop="authorDesc"
         header-align="center"
         align="center"
@@ -93,30 +112,12 @@
         header-align="center"
         align="center"
         label="博主粉丝数">
-      </el-table-column>
-      <el-table-column
-        prop="revision"
-        header-align="center"
-        align="center"
-        label="乐观锁">
-      </el-table-column>
-      <el-table-column
-        prop="creator"
-        header-align="center"
-        align="center"
-        label="创建人">
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column
         prop="createTime"
         header-align="center"
         align="center"
         label="创建时间">
-      </el-table-column>
-      <el-table-column
-        prop="modifier"
-        header-align="center"
-        align="center"
-        label="更新人">
       </el-table-column>
       <el-table-column
         prop="modifiedTime"
@@ -131,7 +132,7 @@
         width="150"
         label="操作">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
+          <!-- <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">修改</el-button> -->
           <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
@@ -247,6 +248,15 @@
             }
           })
         })
+      },
+
+      // 根据勾选生成微博html
+      genFiles () {
+        var ids = this.dataListSelections.map(item => {
+          return item.id
+        })
+
+        location.href = "http://localhost:8080/renren-fast/wms/weibocontent/genFile?ids=" + ids;
       }
     }
   }
