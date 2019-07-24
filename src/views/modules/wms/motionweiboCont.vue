@@ -8,7 +8,7 @@
         <el-button @click="getDataList()">查询</el-button>
         <!-- <el-button v-if="isAuth('wms:weibocontent:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button> -->
         <!-- <el-button v-if="isAuth('wms:weibocontent:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button> -->
-        <el-button type="danger" @click="genFiles()" :disabled="dataListSelections.length <= 0">生成模板</el-button>
+        <!-- <el-button type="danger" @click="genFiles()" :disabled="dataListSelections.length <= 0">生成模板</el-button> -->
       </el-form-item>
     </el-form>
     <el-table
@@ -173,9 +173,6 @@
     },
     watch: {
       dataListSelections: function(val, oldVal){
-        // val.forEach(item => {
-        //   this.selectDataObj[item.weiboContent] = item.picPathList
-        // })
         var result = this.genContent(val)
         Lockr.set('selectCont', result)
       }
@@ -191,7 +188,7 @@
       getDataList () {
         this.dataListLoading = true
         this.$http({
-          url: this.$http.adornUrl('/wms/weibocontent/funList'),
+          url: this.$http.adornUrl('/wms/weibocontent/motionList'),
           method: 'get',
           params: this.$http.adornParams({
             'page': this.pageIndex,
@@ -261,14 +258,6 @@
           })
         })
       },
-
-      // 根据勾选生成微博html
-      genFiles () {
-        var ids = this.dataListSelections.map(item => {
-          return item.id
-        })
-        location.href = "http://localhost:8080/renren-fast/wms/weibocontent/genFile?ids=" + ids;
-      }, 
 
       // 根据val生成模板内容
       genContent(val) {
