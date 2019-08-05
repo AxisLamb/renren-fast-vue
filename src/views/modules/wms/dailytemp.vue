@@ -5,8 +5,9 @@
         <el-input v-model="dataForm.key" placeholder="参数名" clearable></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button @click="getDataList()">查询</el-button>
-        <el-button v-if="isAuth('wms:dailytemp:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
+        <!-- <el-button @click="getDataList()">重新生成模板</el-button> -->
+        <!-- <el-button v-if="isAuth('wms:dailytemp:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button> -->
+        <el-button v-if="isAuth('wms:dailytemp:delete')" type="danger" @click="sureChoice()" >确定选择该版本</el-button>
         <el-button v-if="isAuth('wms:dailytemp:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
       </el-form-item>
     </el-form>
@@ -26,7 +27,13 @@
         prop="id"
         header-align="center"
         align="center"
-        label="">
+        label="行ID">
+      </el-table-column>
+      <el-table-column
+        prop="weiboId"
+        header-align="center"
+        align="center"
+        label="微博ID">
       </el-table-column>
       <el-table-column
         prop="weiboContent"
@@ -61,7 +68,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
+    <!-- <el-pagination
       @size-change="sizeChangeHandle"
       @current-change="currentChangeHandle"
       :current-page="pageIndex"
@@ -69,7 +76,7 @@
       :page-size="pageSize"
       :total="totalPage"
       layout="total, sizes, prev, pager, next, jumper">
-    </el-pagination>
+    </el-pagination> -->
     <!-- 弹窗, 新增 / 修改 -->
     <!-- <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update> -->
   </div>
@@ -100,11 +107,8 @@
     },
     watch: {
       dataList: function(val, oldVal){
-        // val.forEach(item => {
-        //   this.selectDataObj[item.weiboContent] = item.picPathList
-        // })
         var result = this.genContent(val)
-        Lockr.set('selectCont', result)
+        Lockr.set('dailyTempData', result)
       }
     },
     methods: {
@@ -149,7 +153,7 @@
       // 根据val生成模板内容
       genContent(val) {
         var result = ""
-
+        var jsonRes = {}
         val.forEach(item => {
           var weiboContent = item.weiboContent
           var picPathList = item.picPathList
@@ -158,11 +162,16 @@
           result += weiboContent
           if(picPathList != null){
               picPathList.forEach(picurl => {
-              result += "<div style='margin: 10px'><img src=" + picurl + "/></div>"
-            })
-            console.log('result:' + result)
+                result += "<div style='margin: 10px'><img src=" + picurl + "/></div>"
+              })
+              console.log('result:' + result)
+              jsonRes[weiboContent] = picPathList.map(pl => {return "<div style='margin: 10px'><img src='" + pl + "'/></div>"}).reduce((x, y) => x + y)
+          } else {
+            jsonRes[weiboContent] = null
           }
+          
         })
+        Lockr.set('dailyJson', jsonRes)
         return result
       }, 
 
@@ -197,6 +206,38 @@
                   this.getDataList()
                 }
               })
+            } else {
+              this.$message.error(data.msg)
+            }
+          })
+        })
+      },
+      sureChoice() {
+        this.$confirm(`确定已经使用了选择的微博内容作为一个新的发布版本？注意：会逻辑清理已经选择的所有记录`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var idFunArr = Lockr.get('selectFunId')
+          var idMotionArr = Lockr.get('selectMotionId')
+          var thisTableIdArr = this.dataList.map(el => el.weiboId)
+          var collect = thisTableIdArr.concat(idFunArr).concat(idMotionArr)
+          var idSet = new Set(collect)
+          this.$http({
+            url: this.$http.adornUrl('/wms/weibocontent/logicDelete'),
+            method: 'post',
+            data: this.$http.adornData(idSet, false)
+          }).then(({data}) => {
+            if (data && data.code === 0) {
+              this.$message({
+                message: '操作成功',
+                type: 'success',
+                duration: 1500
+              })
+              // 清空表格
+              this.dataList = []
+              // 清空缓存
+              Lockr.set('selectId', [])
             } else {
               this.$message.error(data.msg)
             }
