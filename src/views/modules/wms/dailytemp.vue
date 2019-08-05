@@ -6,14 +6,12 @@
       </el-form-item>
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
-        <!-- <el-button v-if="isAuth('wms:weibocontent:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button> -->
-        <!-- <el-button v-if="isAuth('wms:weibocontent:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button> -->
-        <!-- <el-button type="danger" @click="genFiles()" :disabled="dataListSelections.length <= 0">生成模板</el-button> -->
+        <el-button v-if="isAuth('wms:dailytemp:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
+        <el-button v-if="isAuth('wms:dailytemp:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
       </el-form-item>
     </el-form>
     <el-table
       :data="dataList"
-      :row-key="getRowKeys"
       border
       v-loading="dataListLoading"
       @selection-change="selectionChangeHandle"
@@ -22,14 +20,13 @@
         type="selection"
         header-align="center"
         align="center"
-        :reserve-selection="true"
         width="50">
       </el-table-column>
       <el-table-column
         prop="id"
         header-align="center"
         align="center"
-        label="主键">
+        label="">
       </el-table-column>
       <el-table-column
         prop="weiboContent"
@@ -38,49 +35,7 @@
         label="微博内容">
       </el-table-column>
       <el-table-column
-        prop="weiboTime"
-        header-align="center"
-        align="center"
-        label="发布时间">
-      </el-table-column>
-      <!-- <el-table-column
-        prop="weiboProfileId"
-        header-align="center"
-        align="center"
-        label="微博人信息id"> -->
-      </el-table-column>
-      <el-table-column
-        prop="commentsCount"
-        header-align="center"
-        align="center"
-        label="微博评论数">
-      </el-table-column>
-      <el-table-column
-        prop="repostsCount"
-        header-align="center"
-        align="center"
-        label="微博转发数">
-      </el-table-column>
-      <el-table-column
-        prop="attitudesCount"
-        header-align="center"
-        align="center"
-        label="微博点赞数">
-      </el-table-column>
-      <!-- <el-table-column
-        prop="authorName"
-        header-align="center"
-        align="center"
-        label="微博作者昵称">
-      </el-table-column> -->
-      <el-table-column
-        prop="profileUrl"
-        header-align="center"
-        align="center"
-        label="微博地址首页">
-      </el-table-column>
-      <el-table-column
-        prop="weibo_picture"
+        prop="weiboPicture"
         header-align="center"
         align="center"
         label="微博图片">
@@ -89,43 +44,10 @@
                 placement="right"
                 title=""
                 trigger="click">
-            <!-- <el-image slot="reference" v-for="item in scope.row.picPathList" :src="item" :alt="item" style="max-height: 200px;max-width: 200px"></el-image>
-            <el-image v-for="item in scope.row.picPathList" :src="item" width="40" height="40"></el-image> -->
             <img slot="reference" v-for="item in scope.row.picPathList" :src="item" :alt="item" style="max-height: 100px;max-width: 100px"/>
             <img v-for="item in scope.row.picPathList" :src="item" width="600" height="600" class="head_pic"/>
           </el-popover>
-          <!-- <img v-for="item in scope.row.picPathList" :src="item" width="40" height="40" class="head_pic"/> -->
         </template>
-      </el-table-column>
-      <!-- <el-table-column
-        prop="authorDesc"
-        header-align="center"
-        align="center"
-        label="微博博主个人说明">
-      </el-table-column>
-      <el-table-column
-        prop="authorFollow"
-        header-align="center"
-        align="center"
-        label="博主关注人数">
-      </el-table-column>
-      <el-table-column
-        prop="authorFans"
-        header-align="center"
-        align="center"
-        label="博主粉丝数">
-      </el-table-column> -->
-      <el-table-column
-        prop="createTime"
-        header-align="center"
-        align="center"
-        label="创建时间">
-      </el-table-column>
-      <el-table-column
-        prop="modifiedTime"
-        header-align="center"
-        align="center"
-        label="更新时间">
       </el-table-column>
       <el-table-column
         fixed="right"
@@ -149,12 +71,12 @@
       layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
     <!-- 弹窗, 新增 / 修改 -->
-    <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
+    <!-- <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update> -->
   </div>
 </template>
 
 <script>
-  import AddOrUpdate from './weibocontent-add-or-update'
+  import AddOrUpdate from './dailytemp-add-or-update'
   export default {
     data () {
       return {
@@ -167,13 +89,7 @@
         totalPage: 0,
         dataListLoading: false,
         dataListSelections: [],
-        // selectDataObj: {},
         addOrUpdateVisible: false
-      }
-    },
-    watch: {
-      dataListSelections: function(val, oldVal){
-        this.genContent(val)
       }
     },
     components: {
@@ -182,17 +98,26 @@
     activated () {
       this.getDataList()
     },
+    watch: {
+      dataList: function(val, oldVal){
+        // val.forEach(item => {
+        //   this.selectDataObj[item.weiboContent] = item.picPathList
+        // })
+        var result = this.genContent(val)
+        Lockr.set('selectCont', result)
+      }
+    },
     methods: {
       // 获取数据列表
       getDataList () {
         this.dataListLoading = true
         this.$http({
-          url: this.$http.adornUrl('/wms/weibocontent/motionList'),
+          url: this.$http.adornUrl('/wms/dailytemp/list'),
           method: 'get',
           params: this.$http.adornParams({
             'page': this.pageIndex,
             'limit': this.pageSize,
-            'weiboContent': this.dataForm.key
+            'key': this.dataForm.key
           })
         }).then(({data}) => {
           if (data && data.code === 0) {
@@ -220,6 +145,27 @@
       selectionChangeHandle (val) {
         this.dataListSelections = val
       },
+
+      // 根据val生成模板内容
+      genContent(val) {
+        var result = ""
+
+        val.forEach(item => {
+          var weiboContent = item.weiboContent
+          var picPathList = item.picPathList
+          console.log('weiboContent:' + weiboContent)
+          console.log('picPathList:' + picPathList)
+          result += weiboContent
+          if(picPathList != null){
+              picPathList.forEach(picurl => {
+              result += "<div style='margin: 10px'><img src=" + picurl + "/></div>"
+            })
+            console.log('result:' + result)
+          }
+        })
+        return result
+      }, 
+
       // 新增 / 修改
       addOrUpdateHandle (id) {
         this.addOrUpdateVisible = true
@@ -238,7 +184,7 @@
           type: 'warning'
         }).then(() => {
           this.$http({
-            url: this.$http.adornUrl('/wms/weibocontent/delete'),
+            url: this.$http.adornUrl('/wms/dailytemp/delete'),
             method: 'post',
             data: this.$http.adornData(ids, false)
           }).then(({data}) => {
@@ -256,40 +202,7 @@
             }
           })
         })
-      },
-
-      // 根据val生成模板内容
-      genContent(val) {
-        var result = ""
-        var selectCont = Lockr.get('motionCont')
-
-        // 将weibocontent页面所勾选内容加入到缓存中
-        val.forEach(item => {
-          var weiboContent = item.weiboContent
-          // 缓存不包含内容，可以加入，或者缓存为空，也可加入
-          if(selectCont == null || selectCont.indexOf(weiboContent) == -1){
-            var picPathList = item.picPathList
-            console.log('weiboContent:' + weiboContent)
-            console.log('picPathList:' + picPathList)
-            result += weiboContent
-            if(picPathList != null){
-                picPathList.forEach(picurl => {
-                result += "<div style='margin: 10px'><img src=" + picurl + "/></div>"
-              })
-              console.log('result:' + result)
-            }
-          }
-        })
-        
-        selectCont += result
-        // 更新缓存
-        Lockr.set('motionCont', selectCont)
-      }, 
-
-      getRowKeys(row){
-         return row.id
       }
-
     }
   }
 </script>

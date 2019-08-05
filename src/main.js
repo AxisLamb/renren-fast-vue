@@ -11,6 +11,7 @@ import httpRequest from '@/utils/httpRequest' // api: https://github.com/axios/a
 import { isAuth } from '@/utils'
 import cloneDeep from 'lodash/cloneDeep'
 import Lockr from 'lockr'
+import clipboard from 'clipboard';
 
 Vue.use(VueCookie)
 Vue.config.productionTip = false
@@ -23,6 +24,8 @@ if (process.env.NODE_ENV !== 'production') {
 // 挂载全局
 Vue.prototype.$http = httpRequest // ajax请求方法
 Vue.prototype.isAuth = isAuth     // 权限方法
+// 20190805新增剪切板功能注册到vue原型上
+Vue.prototype.clipboard = clipboard
 
 // 保存整站vuex本地储存初始状态
 window.SITE_CONFIG['storeState'] = cloneDeep(store.state)
