@@ -5,7 +5,7 @@
         <el-input v-model="dataForm.key" placeholder="参数名" clearable></el-input>
       </el-form-item>
       <el-form-item>
-        <!-- <el-button @click="getDataList()">重新生成模板</el-button> -->
+        <el-button @click="reGenTemp()">重新生成模板</el-button>
         <!-- <el-button v-if="isAuth('wms:dailytemp:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button> -->
         <el-button v-if="isAuth('wms:dailytemp:delete')" type="danger" @click="sureChoice()" >确定选择该版本</el-button>
         <el-button v-if="isAuth('wms:dailytemp:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
@@ -47,13 +47,7 @@
         align="center"
         label="微博图片">
         <template slot-scope="scope">
-          <el-popover
-                placement="right"
-                title=""
-                trigger="click">
-            <img slot="reference" v-for="item in scope.row.picPathList" :src="item" :alt="item" style="max-height: 100px;max-width: 100px"/>
-            <img v-for="item in scope.row.picPathList" :src="item" width="600" height="600" class="head_pic"/>
-          </el-popover>
+          <el-button v-if="scope.row.picPathList.length > 0" :data-img="scope.row.picPathList" type="text" size="small" @click="$imgPreview">查看图片</el-button>
         </template>
       </el-table-column>
       <el-table-column
@@ -116,6 +110,26 @@
         this.dataListLoading = true
         this.$http({
           url: this.$http.adornUrl('/wms/dailytemp/list'),
+          method: 'get',
+          params: this.$http.adornParams({
+            'page': this.pageIndex,
+            'limit': this.pageSize,
+            'key': this.dataForm.key
+          })
+        }).then(({data}) => {
+          if (data && data.code === 0) {
+            this.dataList = data.page.list
+            this.totalPage = data.page.totalCount
+          } else {
+            this.dataList = []
+            this.totalPage = 0
+          }
+          this.dataListLoading = false
+        })
+      },
+      reGenTemp() {
+        this.$http({
+          url: this.$http.adornUrl('/wms/dailytemp/reGenTemp'),
           method: 'get',
           params: this.$http.adornParams({
             'page': this.pageIndex,

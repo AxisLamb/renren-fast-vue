@@ -12,8 +12,12 @@ import { isAuth } from '@/utils'
 import cloneDeep from 'lodash/cloneDeep'
 import Lockr from 'lockr'
 import clipboard from 'clipboard';
+import imgPreview from '@/components/imgPreview'
 
 Vue.use(VueCookie)
+// 20190806第三方插件
+Vue.use(imgPreview)
+
 Vue.config.productionTip = false
 
 // 非生产环境, 适配mockjs模拟数据                 // api: https://github.com/nuysoft/Mock
@@ -26,6 +30,7 @@ Vue.prototype.$http = httpRequest // ajax请求方法
 Vue.prototype.isAuth = isAuth     // 权限方法
 // 20190805新增剪切板功能注册到vue原型上
 Vue.prototype.clipboard = clipboard
+
 
 // 保存整站vuex本地储存初始状态
 window.SITE_CONFIG['storeState'] = cloneDeep(store.state)

@@ -85,16 +85,7 @@
         align="center"
         label="微博图片">
         <template slot-scope="scope">
-          <el-popover
-                placement="right"
-                title=""
-                trigger="click">
-            <!-- <el-image slot="reference" v-for="item in scope.row.picPathList" :src="item" :alt="item" style="max-height: 200px;max-width: 200px"></el-image>
-            <el-image v-for="item in scope.row.picPathList" :src="item" width="40" height="40"></el-image> -->
-            <img slot="reference" v-for="item in scope.row.picPathList" :src="item" :alt="item" style="max-height: 100px;max-width: 100px"/>
-            <img v-for="item in scope.row.picPathList" :src="item" width="600" height="600" class="head_pic"/>
-          </el-popover>
-          <!-- <img v-for="item in scope.row.picPathList" :src="item" width="40" height="40" class="head_pic"/> -->
+          <el-button v-if="scope.row.picPathList" :data-img="scope.row.picPathList" type="text" size="small" @click="$imgPreview">查看图片</el-button>
         </template>
       </el-table-column>
       <!-- <el-table-column
