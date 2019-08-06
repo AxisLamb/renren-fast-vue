@@ -1,8 +1,15 @@
 <template>
   <div>
-    <button type='button' @click='refreshCode'>刷新</button>
+    <el-row>
+      <el-button-group>
+        <el-button type="primary" icon="el-icon-edit" @click='refreshCode'>刷新</el-button>
+        <el-button type="warning" icon="el-icon-delete" @click='flushMem'>清空</el-button>
+        <el-button type="success" icon="el-icon-check" @click='copyTemp' class="copy-btn" data-clipboard-target="#temp-content">复制模板</el-button>
+      </el-button-group>
+    </el-row>
+    <!-- <button type='button' @click='refreshCode'>刷新</button>
     <button type='button' @click='flushMem'>清空</button>
-    <button class="copy-btn" data-clipboard-target="#temp-content" :plain="true" type='button' @click='copyTemp'>复制模板</button>
+    <button class="copy-btn" data-clipboard-target="#temp-content" :plain="true" type='button' @click='copyTemp'>复制模板</button> -->
     <div id="temp-content">
       <div v-html="dailyTempData"></div>
       <div v-html="tempCont"></div>
@@ -25,31 +32,36 @@
     },
     methods: {
       refreshCode(){
-        // this.dailyTempData = Lockr.get("dailyTempData")
-        // this.tempCont = Lockr.get("selectCont")
-        // this.motionCont = Lockr.get("motionCont")
         this.dailyTempData = ""
         this.tempCont = ""
         this.motionCont = ""
-        this.dailyJson = Lockr.get("dailyJson")
-        this.funJson = Lockr.get("funJson")
-        this.motionJson = Lockr.get("motionJson")
+        var dailyJson = Lockr.get("dailyJson")
+        var funJson = Lockr.get("funJson")
+        var motionJson = Lockr.get("motionJson")
+        var dailyTempData = ""
+        var tempCont = ""
+        var motionCont = ""
         var _idx = 1
-        for(var weiboCont in this.dailyJson) {
-          var pathList = this.dailyJson[weiboCont]
-          this.dailyTempData += _idx.toString() + ". " + weiboCont + pathList
+        for(var dailyWeiboCont in dailyJson) {
+          var dailyPthList = dailyJson[dailyWeiboCont]
+          dailyTempData += _idx.toString() + ". " + dailyWeiboCont + dailyPthList
           _idx ++
         }
-        for(var weiboCont in this.funJson) {
-          var pathList = this.funJson[weiboCont]
-          this.tempCont += _idx.toString() + ". " + weiboCont + pathList
+        for(var funWeiboCont in funJson) {
+          var funPathList = funJson[funWeiboCont]
+          tempCont += _idx.toString() + ". " + funWeiboCont + funPathList
           _idx ++
         }
-        for(var weiboCont in this.motionJson) {
-          var pathList = this.motionJson[weiboCont]
-          this.motionCont += _idx.toString() + ". " + weiboCont + pathList
+        for(var motionWeiboCont in motionJson) {
+          var pathList = motionJson[motionWeiboCont]
+          motionCont += _idx.toString() + ". " + motionWeiboCont + pathList
           _idx ++
         }
+
+        // 赋值vue对象
+        this.dailyTempData = dailyTempData
+        this.tempCont = tempCont
+        this.motionCont = motionCont
       },
       flushMem(){
         Lockr.set("dailyTempData","")

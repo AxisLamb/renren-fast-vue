@@ -268,39 +268,23 @@
 
       // 根据val生成模板内容
       genContent(val) {
-        var result = ""
         var jsonRes = {}
         var idArr = []
-        var selectCont = Lockr.get('selectCont')
-
         // 将weibocontent页面所勾选内容加入到缓存中
-
         val.forEach(item => {
           // push id
           var weiboId = item.id
           idArr.push(weiboId)
           var weiboContent = item.weiboContent
-          // 缓存不包含内容，可以加入，或者缓存为空，也可加入
-          if(selectCont == null || selectCont.indexOf(weiboContent) == -1){
-            var picPathList = item.picPathList
-            console.log('weiboContent:' + weiboContent)
-            console.log('picPathList:' + picPathList)
-            result += weiboContent
-            if(picPathList != null){
-                picPathList.forEach(picurl => {
-                  result += "<div style='margin: 10px'><img src=" + picurl + "/></div>"
-                })
-                console.log('result:' + result)
-                jsonRes[weiboContent] = picPathList.map(pl => {return "<div style='margin: 10px'><img src='" + pl + "'/></div>"}).reduce((x, y) => x + y)
-            } else {
-              jsonRes[weiboContent] = null
-            }
+          var picPathList = item.picPathList
+          if(picPathList != null){
+              jsonRes[weiboContent] = picPathList.map(pl => {return "<div style='margin: 10px'><img src='" + pl + "'/></div>"}).reduce((x, y) => x + y)
+          } else {
+            jsonRes[weiboContent] = ""
           }
         })
         
-        selectCont += result
         // 更新缓存
-        Lockr.set('selectCont', selectCont)
         Lockr.set('funJson', jsonRes)
         // 更新id
         Lockr.set('selectFunId', idArr)

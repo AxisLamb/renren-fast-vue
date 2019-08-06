@@ -107,8 +107,7 @@
     },
     watch: {
       dataList: function(val, oldVal){
-        var result = this.genContent(val)
-        Lockr.set('dailyTempData', result)
+        this.genContent(val)
       }
     },
     methods: {
@@ -152,27 +151,17 @@
 
       // 根据val生成模板内容
       genContent(val) {
-        var result = ""
         var jsonRes = {}
         val.forEach(item => {
           var weiboContent = item.weiboContent
           var picPathList = item.picPathList
-          console.log('weiboContent:' + weiboContent)
-          console.log('picPathList:' + picPathList)
-          result += weiboContent
           if(picPathList != null){
-              picPathList.forEach(picurl => {
-                result += "<div style='margin: 10px'><img src=" + picurl + "/></div>"
-              })
-              console.log('result:' + result)
               jsonRes[weiboContent] = picPathList.map(pl => {return "<div style='margin: 10px'><img src='" + pl + "'/></div>"}).reduce((x, y) => x + y)
           } else {
             jsonRes[weiboContent] = null
           }
-          
         })
         Lockr.set('dailyJson', jsonRes)
-        return result
       }, 
 
       // 新增 / 修改
