@@ -265,7 +265,7 @@
           if(picPathList != null){
             jsonRes[weiboContent] = picPathList.map(pl => {return "<div style='margin: 10px'><img src='" + pl + "'/></div>"}).reduce((x, y) => x + y)
           } else {
-            jsonRes[weiboContent] = ""
+            jsonRes[weiboContent] = "<div></div>"
           }
         })
         // 更新缓存

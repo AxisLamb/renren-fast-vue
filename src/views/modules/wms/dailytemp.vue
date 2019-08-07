@@ -47,7 +47,7 @@
         align="center"
         label="微博图片">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.picPathList.length > 0" :data-img="scope.row.picPathList" type="text" size="small" @click="$imgPreview">查看图片</el-button>
+          <el-button v-if="scope.row.picPathList" :data-img="scope.row.picPathList" type="text" size="small" @click="$imgPreview">查看图片</el-button>
         </template>
       </el-table-column>
       <el-table-column
@@ -172,7 +172,7 @@
           if(picPathList != null){
               jsonRes[weiboContent] = picPathList.map(pl => {return "<div style='margin: 10px'><img src='" + pl + "'/></div>"}).reduce((x, y) => x + y)
           } else {
-            jsonRes[weiboContent] = null
+            jsonRes[weiboContent] = "<div></div>"
           }
         })
         Lockr.set('dailyJson', jsonRes)
